@@ -14,7 +14,6 @@ import tomlkit
 from tomlkit.exceptions import UnexpectedCharError, UnexpectedEofError
 from tomlkit.items import AoT, Comment, Item, Key, Table, Whitespace
 
-from .aux_types import BaseMapping
 from .config_parser import ParsedConfig
 
 DEFAULT_CONFIG = ParsedConfig()
@@ -231,7 +230,7 @@ class FormattedTomlFileSection(BaseTomlContentsSequence):
                 level_number += 1
 
 
-class FormattedToml(BaseMapping):
+class FormattedToml:
     """Class to help format the contents of a TOML file."""
 
     def __init__(
