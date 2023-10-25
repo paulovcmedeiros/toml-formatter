@@ -4,7 +4,7 @@
   name = "toml-formatter"
   version = "0.1.0"
   # Other package info
-  authors = ["Paulo V C Medeiros"]
+  authors = ["Paulo V C Medeiros <paulo.medeiros@smhi.se>"]
   license = "MIT"
 
 [tool.poetry.scripts]
@@ -28,6 +28,11 @@
 [tool.poetry.group.dev.dependencies]
   ipython = "^8.16.1"
   pre-commit = "^3.5.0"
+
+[tool.poetry.group.doc.dependencies]
+  myst-parser = "^2.0.0"
+  sphinx = "^7.2.6"
+  sphinx-rtd-theme = "^1.3.0"
 
 [tool.poetry.group.linting.dependencies]
   black = {extras = ["jupyter"], version = "^23.10.0"}
@@ -94,6 +99,12 @@
   poetry_command = "devtools"
 
 [tool.poe.tasks]
+  # Doc-related stuff
+  _doc_build.shell = """
+    sphinx-apidoc toml_formatter -o docs/ --force --no-toc --module-first
+    sphinx-build docs docs/_build/
+    touch docs/_build/.nojekyll
+  """
   # Linting tasks
   _black = "black ."
   _isort = "isort ."
@@ -102,11 +113,36 @@
   # Test-related tasks
   pytest = "pytest"
   # Tasks to be run as pre-push checks
-  pre-push-checks = ["lint", "pytest"]
+  pre-push-checks = ["lint", "doc clean", "doc build", "pytest"]
 
 [tool.poe.tasks._flake8]
   cmd = "flakeheaven lint ."
   env = {FLAKEHEAVEN_CACHE_TIMEOUT = "0"}
+
+[tool.poe.tasks.doc]
+  args = [
+    {name = "doc_action", positional = true, help = "{all,clean,build,view}", default = "all"},
+  ]
+  control = {expr = "doc_action"}
+
+[[tool.poe.tasks.doc.switch]]
+  case = "all"
+  sequence = ["doc build", "doc view"]
+
+[[tool.poe.tasks.doc.switch]]
+  case = "clean"
+  cmd = "rm -rf docs/_build/ docs/toml-formatter.rst docs/markdown_docs/config.md"
+
+[[tool.poe.tasks.doc.switch]]
+  case = "build"
+  sequence = ["doc clean", "_doc_build"]
+
+[[tool.poe.tasks.doc.switch]]
+  case = "view"
+  sequence = [
+    {shell = "[ ! -f docs/_build/index.html ] && poetry devtools doc build || exit 0"},
+    {script = "webbrowser:open('docs/_build/index.html')"},
+  ]
 
 [tool.poe.tasks.lint]
   args = [{name = "fix", type = "boolean", default = false}]
