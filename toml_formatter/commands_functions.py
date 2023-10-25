@@ -27,7 +27,7 @@ def show_configs(args, config):  # noqa: ARG001
     sys.stdout.write(str(formatted_toml) + "\n")
 
 
-def check_toml_files_format(args, config):
+def check_toml_files_format(args, config):  # noqa: PLR0912
     """Implement the `check` command."""
 
     def _exclude_if_hidden(fpath):

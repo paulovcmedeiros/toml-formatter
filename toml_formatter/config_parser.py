@@ -8,6 +8,8 @@ from pydantic import BaseModel, NonNegativeInt, PositiveInt
 
 
 class ParsedConfig(BaseModel):
+    """Model for the package's config file."""
+
     line_length: PositiveInt = 90
     indentation: NonNegativeInt = 2
     section_order_overrides: tuple[str, ...] = ()
@@ -15,6 +17,7 @@ class ParsedConfig(BaseModel):
 
     @classmethod
     def from_toml_file(cls, path):
+        """Parse a config file and return a `ParsedConfig` instance."""
         with open(path, "rb") as config_file:
             try:
                 configs = tomli.load(config_file)["tool"]["toml_formatter"]

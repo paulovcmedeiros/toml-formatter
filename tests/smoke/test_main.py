@@ -20,9 +20,8 @@ def test_package_executable_is_in_path():
 
 @pytest.mark.parametrize("argv", [[], None])
 def test_cannot_run_without_arguments(argv):
-    with redirect_stderr(StringIO()):
-        with pytest.raises(SystemExit, match="2"):
-            main(argv)
+    with redirect_stderr(StringIO()), pytest.raises(SystemExit, match="2"):
+        main(argv)
 
 
 class TestMainShowCommands:
@@ -37,9 +36,10 @@ class TestMainShowCommands:
             for new in itertools.count():
                 yield 100 * new
 
-        with mock.patch("time.time", mock.MagicMock(side_effect=fake_time())):
-            with redirect_stdout(StringIO()):
-                main(["configs"])
+        with mock.patch(
+            "time.time", mock.MagicMock(side_effect=fake_time())
+        ), redirect_stdout(StringIO()):
+            main(["configs"])
 
 
 def test_toml_formatter_command(tmp_path_factory):

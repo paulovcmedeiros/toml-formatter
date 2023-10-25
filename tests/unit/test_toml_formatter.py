@@ -7,7 +7,7 @@ from toml_formatter.toml_formatter import FormattedToml
 
 @pytest.fixture()
 def toml_file_as_string():
-    toml_string = """
+    return """
 
 
 waldo   =   "bar"  #  This name should stay at the top, otherwise it will endup in a table
@@ -77,12 +77,11 @@ all_inline_2  =   false   #    This line should not be formatted
 '''
 
 """
-    return toml_string
 
 
 @pytest.fixture()
 def expected_formatted_string():
-    expected_string = """\
+    return """\
 waldo = "bar" # This name should stay at the top, otherwise it will endup in a table
 
 [foobar.foo]
@@ -152,7 +151,6 @@ all_inline_2  =   false   #    This line should not be formatted
   a = 1
 \
 """
-    return expected_string
 
 
 @pytest.fixture()

@@ -51,9 +51,12 @@ class BaseTomlContentsSequence(collections.abc.Sequence):
 class ParsedTomlFileEntry:
     """A single, atomic parsed entry in a TOML file."""
 
-    def __init__(self, single_entry_string: str):
+    def __init__(
+        self, single_entry_string: str, formatting_options: ParsedConfig = DEFAULT_CONFIG
+    ):
         """Initialise instance."""
         self.toml_doc_obj = tomlkit.loads(single_entry_string)
+        self.formatting_options = formatting_options
 
     @property
     def toml_doc_obj(self):
@@ -64,10 +67,7 @@ class ParsedTomlFileEntry:
     def toml_doc_obj(self, new):
         self._toml_doc_obj = new
 
-        if isinstance(self.item, Whitespace):
-            trivia = None
-        else:
-            trivia = self.item.trivia
+        trivia = None if isinstance(self.item, Whitespace) else self.item.trivia
 
         try:
             key, value = tomlkit.key_value(str(self))
@@ -107,9 +107,10 @@ class ParsedTomlFileEntry:
 
     @property
     def defined_as_key_value(self):
+        """Return True if instance was defined as a key-value pair; False otherwise."""
         try:
             return self._defined_as_key_value
-        except:
+        except AttributeError:
             return False
 
     @property
@@ -131,12 +132,11 @@ class ParsedTomlFileEntry:
         ]
 
     def _fix_spaces_around_comments(self):
-        if not isinstance(self.item, (Whitespace, Comment)):
-            if self.item.trivia.comment:
-                comment_text = self.item.trivia.comment.split("#", 1)[1].strip()
-                if not comment_text.startswith("#"):
-                    self.item.trivia.comment = f"# {comment_text}"
-                    self.item.trivia.comment_ws = " "
+        if not isinstance(self.item, (Whitespace, Comment)) and self.item.trivia.comment:
+            comment_text = self.item.trivia.comment.split("#", 1)[1].strip()
+            if not comment_text.startswith("#"):
+                self.item.trivia.comment = f"# {comment_text}"
+                self.item.trivia.comment_ws = " "
 
     def __eq__(self, other):
         if isinstance(other, ParsedTomlFileEntry):
@@ -147,7 +147,7 @@ class ParsedTomlFileEntry:
         str_repr = self.toml_doc_obj.as_string().rstrip()
         if isinstance(self.item, AoT) and self.defined_as_key_value:
             str_repr = _get_aot_repr(self.item, self.key)
-            if len(str_repr) > 90:
+            if len(str_repr) > self.formatting_options.line_length:
                 str_repr = _get_aot_repr(self.item, self.key, multiline=True)
         with contextlib.suppress(AttributeError):
             if str_repr.startswith((self._indent_level + 1) * " "):
@@ -291,7 +291,7 @@ def _indent_atomic_toml_entry(entry: ParsedTomlFileEntry, indent: int = 0):
     indent_str = indent * " "
     if isinstance(entry.item, (Table, AoT)) and entry.defined_as_key_value:
         # For whatever reason, tomlkit treats this as a special case
-        entry.key._original = indent_str + entry.key._original.strip()
+        entry.key._original = indent_str + entry.key._original.strip()  # noqa: SLF001
     else:
         entry.item.indent(indent)
 
@@ -299,13 +299,13 @@ def _indent_atomic_toml_entry(entry: ParsedTomlFileEntry, indent: int = 0):
         # Convert to multiline all inline arrays whose str len is > 90 characters
         is_multiline = any(
             isinstance(value, Whitespace) and value.value.strip(" ") == "\n"
-            for value in itertools.chain.from_iterable(entry.item._value)
+            for value in itertools.chain.from_iterable(entry.item._value)  # noqa: SLF001
         )
         should_be_multiline = False
         if not is_multiline:
             str_repr = indent_str + str(entry)
             for line in str_repr.split("\n"):
-                if len(line.rstrip()) > 90:
+                if len(line.rstrip()) > entry.formatting_options.line_length:
                     should_be_multiline = True
                     break
 

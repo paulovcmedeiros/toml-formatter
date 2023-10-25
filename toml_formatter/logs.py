@@ -45,7 +45,8 @@ class LogFormatter:
         rtn = f"{self.datetime} | {self.level} | "
 
         loglevel = logger.level(loglevel.upper())
-        if loglevel.no < 20:  # More detail than just "INFO"
+        if loglevel.no < 20:  # noqa: PLR2004
+            # More detail than just "INFO"
             rtn = f"{self.code_location}\n{rtn}"
 
         rtn += f"{self.message}"
@@ -107,7 +108,7 @@ def log_elapsed_time(**kwargs):
             function_rtn = function(*args, **kwargs)
             elapsed = time.time() - t_start
 
-            if elapsed < 60:
+            if elapsed < 60:  # noqa: PLR2004
                 logger.opt(colors=True).info(
                     "<blue>Leaving {}. Total runtime: {:.2f}s.</blue>", name, elapsed
                 )
