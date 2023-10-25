@@ -1,0 +1,127 @@
+[tool.poetry]
+  # Package ID info
+  description = "A small formatter for TOML files written in Python."
+  name = "toml-formatter"
+  version = "0.1.0"
+  # Other package info
+  authors = ["Paulo V C Medeiros"]
+  license = "MIT"
+
+[tool.poetry.scripts]
+  toml-formatter = "toml_formatter.__main__:main"
+
+[build-system]
+  build-backend = "poetry.core.masonry.api"
+  requires = ["poetry-core >= 1.0.0"]
+
+[tool.poetry.dependencies]
+  # Python version
+  python = ">=3.9,<3.13"
+  # General dependencies
+  humanize = "^4.8.0"
+  loguru = "^0.7.1"
+  pydantic = "^2.4.2"
+  tomli = "^2.0.1"
+  tomli_w = "^1.0.0"
+  tomlkit = "^0.12.1"
+
+[tool.poetry.group.dev.dependencies]
+  ipython = "^8.16.1"
+  pre-commit = "^3.5.0"
+
+[tool.poetry.group.linting.dependencies]
+  black = {extras = ["jupyter"], version = "^23.10.0"}
+  flake8 = ">=4.0.1, <5.0.0"
+  flakeheaven = "^3.3.0"
+  isort = "^5.12.0"
+  ruff = "^0.1.0"
+  # flake8 plugins for stuff not yet on ruff.
+  # See <https://github.com/astral-sh/ruff/issues/458>.
+  pydoclint = "^0.3.4" # Replaces darglint, but is maintained & faster
+
+[tool.poetry.group.test.dependencies]
+  pytest = "^7.4.3"
+  pytest-cov = "^4.1.0"
+  pytest-profiling = "^1.7.0"
+
+  ##################
+  # Linter configs #
+  ##################
+
+[tool.black]
+  line-length = 90
+
+[tool.flakeheaven]
+  base = ".flakeheaven.toml"
+
+[tool.isort]
+  line_length = 90
+  profile = "black"
+
+[tool.ruff]
+  # C901: Function is too complex. Ignoring this for now but will be removed later.
+  ignore = ["C901", "RUF012"]
+  line-length = 90
+  select = ["S", "B", "A", "C4", "ERA", "G", "PT", "C90", "N", "RUF", "ARG", "BLE001"]
+
+[tool.ruff.per-file-ignores]
+  # S101: Use of `assert` detected
+  "tests/**/*.py" = ["S101"]
+
+[tool.toml_formatter]
+  indentation = 2
+  section_order_overrides = [
+    "^tool.poetry$",
+    "^tool.poetry.scripts$",
+    "build-system",
+    "tool.poetry.*",
+  ]
+
+  ##################
+  # pytest configs #
+  ##################
+
+[tool.pytest.ini_options]
+  addopts = "-v --cov-report=term-missing --cov-report=term:skip-covered --cov-report=xml:.coverage.xml --cov=./"
+  log_cli_level = "INFO"
+  testpaths = ["tests/smoke", "tests/unit"]
+
+  ####################################
+  # Leave configs for `poe` separate #
+  ####################################
+
+[tool.poe]
+  poetry_command = "devtools"
+
+[tool.poe.tasks]
+  # Linting tasks
+  _black = "black ."
+  _isort = "isort ."
+  _ruff = "ruff check ."
+  _toml_formatter = "toml-formatter check ."
+  # Test-related tasks
+  pytest = "pytest"
+  # Tasks to be run as pre-push checks
+  pre-push-checks = ["lint", "pytest"]
+
+[tool.poe.tasks._flake8]
+  cmd = "flakeheaven lint ."
+  env = {FLAKEHEAVEN_CACHE_TIMEOUT = "0"}
+
+[tool.poe.tasks.lint]
+  args = [{name = "fix", type = "boolean", default = false}]
+  control = {expr = "fix"}
+
+[[tool.poe.tasks.lint.switch]]
+  case = "True"
+  sequence = ["_isort", "_black", "_ruff --fix", "_flake8", "_toml_formatter --fix"]
+
+[[tool.poe.tasks.lint.switch]]
+  case = "False"
+  sequence = [
+    "_isort --check-only",
+    "_black --check --diff",
+    "_ruff",
+    "_flake8",
+    "_toml_formatter",
+  ]
