@@ -22,6 +22,7 @@ author = "Paulo V C Medeiros <paulo.medeiros@smhi.se>"
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
 ]
