@@ -6,4 +6,30 @@
 
 An unpretentious formatter for TOML files written in Python.
 
-See the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs).
+See also the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs).
+
+## Configuration
+To modify the default options for the package, add a `[tool.toml-formatter]` section in your project's `pyproject.toml` file. Please take a look at the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.config_parser.FormatterOptions) for more information about the supported configuration options.
+
+To see the configs in use, please run
+```bash
+toml-formatter configs
+```
+
+## Basic Usage
+### CLI Usage
+#### Check if file(s) are formatted
+```bash
+toml-formatter check path/to/toml/files/or/directory/containing/them
+```
+#### Fix the formatting
+```bash
+toml-formatter check --fix-inplace path/to/toml/files/or/directory/containing/them
+```
+
+### Use as Module
+```python
+from toml_formatter.toml_formatter import FormattedToml
+```
+
+See the [API documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.toml_formatter.FormattedToml) for information about the `FormattedToml` class and how to configure the [formatter options](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.config_parser.FormatterOptions) it uses.
