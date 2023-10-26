@@ -1,11 +1,14 @@
 [tool.poetry]
   # Package ID info
-  description = "A small formatter for TOML files written in Python."
+  description = "An unpretentious formatter for TOML files written in Python."
   name = "toml-formatter"
   version = "0.1.0"
   # Other package info
   authors = ["Paulo V C Medeiros <paulo.medeiros@smhi.se>"]
+  documentation = "https://paulovcmedeiros.github.io/toml-formatter-docs"
   license = "MIT"
+  readme = "README.md"
+  repository = "https://github.com/paulovcmedeiros/toml-formatter"
 
 [tool.poetry.scripts]
   toml-formatter = "toml_formatter.__main__:main"
@@ -22,7 +25,7 @@
   loguru = "^0.7.1"
   pydantic = "^2.4.2"
   tomli = "^2.0.1"
-  tomli_w = "^1.0.0"
+  tomli-w = "^1.0.0"
   tomlkit = "^0.12.1"
 
 [tool.poetry.group.dev.dependencies]

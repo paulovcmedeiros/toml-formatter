@@ -1,5 +1,5 @@
 # IDE stuff
-.swp
+*.swp
 .idea/
 .vscode/
 
@@ -10,12 +10,14 @@
 
 # Linting artifacts
 .flakeheaven_cache/
+.ruff_cache
 
 # Non-tracked doc files
 docs/
 
 # Poetry stuff
 poetry.lock
+.venv/
 
 # Stuff generated at runtime
 **/__pycache__/
