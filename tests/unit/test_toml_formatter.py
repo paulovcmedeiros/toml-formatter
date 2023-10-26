@@ -2,7 +2,7 @@
 """Tests for the toml formatting routines."""
 import pytest
 
-from toml_formatter.toml_formatter import FormattedToml
+from toml_formatter.formatter import FormattedToml
 
 
 @pytest.fixture()

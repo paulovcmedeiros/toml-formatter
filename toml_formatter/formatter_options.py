@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Registration and validation of options passed in the config file."""
+"""Registration and validation of options passed to the formatter."""
 from functools import reduce
-from typing import Literal
+from pathlib import Path
+from typing import Literal, Union
 
 import tomli
 from pydantic import BaseModel, NonNegativeInt, PositiveInt
@@ -16,7 +17,7 @@ class FormatterOptions(BaseModel):
     loglevel: Literal["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
     @classmethod
-    def from_toml_file(cls, path):
+    def from_toml_file(cls, path: Union[str, Path]):
         """Parse a config file and return an instance of the class."""
         with open(path, "rb") as config_file:
             try:
@@ -49,3 +50,6 @@ class FormatterOptions(BaseModel):
                 return reduce(getattr, item.split("."), self)
             except AttributeError as error:
                 raise KeyError(item) from error
+
+
+DEFAULT_FORMATTER_OPTIONS = FormatterOptions()

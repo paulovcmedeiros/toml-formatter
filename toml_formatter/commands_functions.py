@@ -8,8 +8,8 @@ import tomli_w
 
 from toml_formatter import GeneralConstants
 
+from .formatter import FormattedToml
 from .logs import logger
-from .toml_formatter import FormattedToml
 
 
 def show_configs(args, config):  # noqa: ARG001
@@ -17,7 +17,7 @@ def show_configs(args, config):  # noqa: ARG001
 
     Args:
         args (argparse.Namespace): Parsed command line arguments.
-        config (.config_parser.FormatterOptions): Parsed config file contents.
+        config (.formatter_options.FormatterOptions): Parsed config file contents.
 
     """
     logger.info("Printing requested configs...")

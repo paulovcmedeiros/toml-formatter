@@ -9,7 +9,7 @@ An unpretentious formatter for TOML files written in Python.
 See also the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs).
 
 ## Configuration
-To modify the default options for the package, add a `[tool.toml-formatter]` section in your project's `pyproject.toml` file. Please take a look at the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.config_parser.FormatterOptions) for more information about the supported configuration options.
+To modify the default options for the package, add a `[tool.toml-formatter]` section in your project's `pyproject.toml` file. Please take a look at the [online documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.formatter_options.FormatterOptions) for more information about the supported configuration options.
 
 To see the configs in use, please run
 ```bash
@@ -29,7 +29,7 @@ toml-formatter check --fix-inplace path/to/toml/files/or/directory/containing/th
 
 ### Use as Module
 ```python
-from toml_formatter.toml_formatter import FormattedToml
+from toml_formatter.formatter import FormattedToml
 ```
 
-See the [API documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.toml_formatter.FormattedToml) for information about the `FormattedToml` class and how to configure the [formatter options](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.config_parser.FormatterOptions) it uses.
+See the [API documentation](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.formatter.FormattedToml) for information about the `FormattedToml` class and how to configure the [formatter options](https://paulovcmedeiros.github.io/toml-formatter-docs/toml_formatter.html#toml_formatter.formatter_options.FormatterOptions) it uses.

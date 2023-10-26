@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Code for a rudimentary TOML formatter, hopefully covering the most common use cases."""
+"""Code related to TOML formatting."""
 import collections.abc
 import contextlib
 import csv
@@ -14,9 +14,7 @@ import tomlkit
 from tomlkit.exceptions import UnexpectedCharError, UnexpectedEofError
 from tomlkit.items import AoT, Comment, Item, Key, Table, Whitespace
 
-from .config_parser import FormatterOptions
-
-DEFAULT_CONFIG = FormatterOptions()
+from .formatter_options import DEFAULT_FORMATTER_OPTIONS, FormatterOptions
 
 
 class _BaseTomlContentsSequence(collections.abc.Sequence):
@@ -54,7 +52,7 @@ class _ParsedTomlFileEntry:
     def __init__(
         self,
         single_entry_string: str,
-        formatter_options: FormatterOptions = DEFAULT_CONFIG,
+        formatter_options: FormatterOptions = DEFAULT_FORMATTER_OPTIONS,
     ):
         """Initialise instance."""
         self.toml_doc_obj = tomlkit.loads(single_entry_string)
@@ -189,7 +187,9 @@ class _FormattedTomlFileSection(_BaseTomlContentsSequence):
     """Class that holds and formats data for a single section of a TOML file."""
 
     def __init__(
-        self, data: Sequence[str], formatter_options: FormatterOptions = DEFAULT_CONFIG
+        self,
+        data: Sequence[str],
+        formatter_options: FormatterOptions = DEFAULT_FORMATTER_OPTIONS,
     ):
         """Initialise instance."""
         self.formatter_options = FormatterOptions.model_validate(formatter_options)
@@ -238,7 +238,7 @@ class FormattedToml:
     def __init__(
         self,
         raw_data: Sequence[str],
-        formatter_options: FormatterOptions = DEFAULT_CONFIG,
+        formatter_options: FormatterOptions = DEFAULT_FORMATTER_OPTIONS,
     ):
         """Initialise, with `raw_data` being like the output of a file's `readlines`."""
         self.formatter_options = FormatterOptions.model_validate(formatter_options)
@@ -395,7 +395,7 @@ def _sort_keys(
 
 def _split_data_in_sections(
     entries: _TomlFileEntriesContainer,
-    formatter_options: FormatterOptions = DEFAULT_CONFIG,
+    formatter_options: FormatterOptions = DEFAULT_FORMATTER_OPTIONS,
 ) -> Tuple[_FormattedTomlFileSection]:
     sections = []
     new_section = []
