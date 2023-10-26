@@ -7,8 +7,8 @@ import tomli
 from pydantic import BaseModel, NonNegativeInt, PositiveInt
 
 
-class ParsedConfig(BaseModel):
-    """Model for the package's config file."""
+class FormatterOptions(BaseModel):
+    """Model for the formatter's configuration options."""
 
     line_length: PositiveInt = 90
     indentation: NonNegativeInt = 2
@@ -17,10 +17,10 @@ class ParsedConfig(BaseModel):
 
     @classmethod
     def from_toml_file(cls, path):
-        """Parse a config file and return a `ParsedConfig` instance."""
+        """Parse a config file and return an instance of the class."""
         with open(path, "rb") as config_file:
             try:
-                configs = tomli.load(config_file)["tool"]["toml_formatter"]
+                configs = tomli.load(config_file)["tool"]["toml-formatter"]
             except KeyError:
                 configs = {}
         return cls(**configs)

@@ -17,12 +17,12 @@ def show_configs(args, config):  # noqa: ARG001
 
     Args:
         args (argparse.Namespace): Parsed command line arguments.
-        config (.config_parser.ParsedConfig): Parsed config file contents.
+        config (.config_parser.FormatterOptions): Parsed config file contents.
 
     """
     logger.info("Printing requested configs...")
     formatted_toml = FormattedToml.from_string(
-        toml_string=tomli_w.dumps(config.model_dump()), formatting_options=config
+        toml_string=tomli_w.dumps(config.model_dump()), formatter_options=config
     )
     sys.stdout.write(str(formatted_toml) + "\n")
 
@@ -51,7 +51,7 @@ def check_toml_files_format(args, config):  # noqa: PLR0912
     for fpath in itertools.chain.from_iterable(file_iterators):
         n_files += 1
 
-        formatted_toml = FormattedToml.from_file(path=fpath, formatting_options=config)
+        formatted_toml = FormattedToml.from_file(path=fpath, formatter_options=config)
         actual_toml = fpath.read_text()
 
         file_needs_formatting = False

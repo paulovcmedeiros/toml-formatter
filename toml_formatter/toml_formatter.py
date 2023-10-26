@@ -14,12 +14,12 @@ import tomlkit
 from tomlkit.exceptions import UnexpectedCharError, UnexpectedEofError
 from tomlkit.items import AoT, Comment, Item, Key, Table, Whitespace
 
-from .config_parser import ParsedConfig
+from .config_parser import FormatterOptions
 
-DEFAULT_CONFIG = ParsedConfig()
+DEFAULT_CONFIG = FormatterOptions()
 
 
-class BaseTomlContentsSequence(collections.abc.Sequence):
+class _BaseTomlContentsSequence(collections.abc.Sequence):
     """Basic functionality for the `Sequence`-type classes in the module."""
 
     @property
@@ -48,15 +48,17 @@ class BaseTomlContentsSequence(collections.abc.Sequence):
         return len(self.data)
 
 
-class ParsedTomlFileEntry:
+class _ParsedTomlFileEntry:
     """A single, atomic parsed entry in a TOML file."""
 
     def __init__(
-        self, single_entry_string: str, formatting_options: ParsedConfig = DEFAULT_CONFIG
+        self,
+        single_entry_string: str,
+        formatter_options: FormatterOptions = DEFAULT_CONFIG,
     ):
         """Initialise instance."""
         self.toml_doc_obj = tomlkit.loads(single_entry_string)
-        self.formatting_options = ParsedConfig.model_validate(formatting_options)
+        self.formatter_options = FormatterOptions.model_validate(formatter_options)
 
     @property
     def toml_doc_obj(self):
@@ -139,7 +141,7 @@ class ParsedTomlFileEntry:
                 self.item.trivia.comment_ws = " "
 
     def __eq__(self, other):
-        if isinstance(other, ParsedTomlFileEntry):
+        if isinstance(other, _ParsedTomlFileEntry):
             return self.toml_doc_obj == other.toml_doc_obj
         return False
 
@@ -147,7 +149,7 @@ class ParsedTomlFileEntry:
         str_repr = self.toml_doc_obj.as_string().rstrip()
         if isinstance(self.item, AoT) and self.defined_as_key_value:
             str_repr = _get_aot_repr(self.item, self.key)
-            if len(str_repr) > self.formatting_options.line_length:
+            if len(str_repr) > self.formatter_options.line_length:
                 str_repr = _get_aot_repr(self.item, self.key, multiline=True)
         with contextlib.suppress(AttributeError):
             if str_repr.startswith((self._indent_level + 1) * " "):
@@ -158,14 +160,14 @@ class ParsedTomlFileEntry:
         return hash(self.toml_doc_obj.as_string())
 
 
-class TomlFileEntriesContainer(BaseTomlContentsSequence):
+class _TomlFileEntriesContainer(_BaseTomlContentsSequence):
     """Container for parsed TOML file entries."""
 
     def __init__(self, data: Sequence[str]):
         """Initialise instance with `data` formatted as in a file's `readlines` method."""
         self.data = data
 
-    @BaseTomlContentsSequence.data.setter
+    @_BaseTomlContentsSequence.data.setter
     def data(self, new: Sequence[str]):
         """Parse passed data and store validated TOML atomic entries."""
         atomic_entries = []
@@ -173,7 +175,7 @@ class TomlFileEntriesContainer(BaseTomlContentsSequence):
         for line in new:
             str_to_parse = "".join([*previous_lines_failed_to_parse, line])
             try:
-                new_entry = ParsedTomlFileEntry(str_to_parse)
+                new_entry = _ParsedTomlFileEntry(str_to_parse)
             except (UnexpectedEofError, UnexpectedCharError):
                 previous_lines_failed_to_parse.append(line)
             else:
@@ -183,18 +185,18 @@ class TomlFileEntriesContainer(BaseTomlContentsSequence):
         self._data = tuple(atomic_entries)
 
 
-class FormattedTomlFileSection(BaseTomlContentsSequence):
+class _FormattedTomlFileSection(_BaseTomlContentsSequence):
     """Class that holds and formats data for a single section of a TOML file."""
 
     def __init__(
-        self, data: Sequence[str], formatting_options: ParsedConfig = DEFAULT_CONFIG
+        self, data: Sequence[str], formatter_options: FormatterOptions = DEFAULT_CONFIG
     ):
         """Initialise instance."""
-        self.formatting_options = ParsedConfig.model_validate(formatting_options)
+        self.formatter_options = FormatterOptions.model_validate(formatter_options)
         self.data = data
 
-    @BaseTomlContentsSequence.data.setter
-    def data(self, new: Sequence[ParsedTomlFileEntry]) -> Tuple[ParsedTomlFileEntry]:
+    @_BaseTomlContentsSequence.data.setter
+    def data(self, new: Sequence[_ParsedTomlFileEntry]) -> Tuple[_ParsedTomlFileEntry]:
         """Set the data for the instance, applying formatting routines."""
         if new:
             new = _remove_consecutive_blanks(new)
@@ -224,7 +226,7 @@ class FormattedTomlFileSection(BaseTomlContentsSequence):
     def _normalise_indentation(self):
         level_number = 0
         for entry in self:
-            indent_int = level_number * self.formatting_options.indentation
+            indent_int = level_number * self.formatter_options.indentation
             entry.indent(indent_int)
             if isinstance(entry.item, (Table, AoT)) and not entry.defined_as_key_value:
                 level_number += 1
@@ -234,13 +236,15 @@ class FormattedToml:
     """Class to help format the contents of a TOML file."""
 
     def __init__(
-        self, raw_data: Sequence[str], formatting_options: ParsedConfig = DEFAULT_CONFIG
+        self,
+        raw_data: Sequence[str],
+        formatter_options: FormatterOptions = DEFAULT_CONFIG,
     ):
         """Initialise, with `raw_data` being like the output of a file's `readlines`."""
-        self.formatting_options = ParsedConfig.model_validate(formatting_options)
+        self.formatter_options = FormatterOptions.model_validate(formatter_options)
         self.sections = _split_data_in_sections(
-            TomlFileEntriesContainer(data=raw_data),
-            formatting_options=self.formatting_options,
+            _TomlFileEntriesContainer(data=raw_data),
+            formatter_options=self.formatter_options,
         )
 
     @classmethod
@@ -257,35 +261,35 @@ class FormattedToml:
         return cls(raw_data=raw_data, **kwargs)
 
     @property
-    def sections(self) -> Tuple[FormattedTomlFileSection]:
+    def sections(self) -> Tuple[_FormattedTomlFileSection]:
         """Return the sections present in the file."""
         return getattr(self, "_sections", ())
 
     @sections.setter
-    def sections(self, new: Sequence[FormattedTomlFileSection]):
+    def sections(self, new: Sequence[_FormattedTomlFileSection]):
         for section in new:
-            section.formatting_options = self.formatting_options
+            section.formatter_options = self.formatter_options
         self._sections = _get_sorted_sequence_of_sections(
-            new, override_sorting=self.formatting_options.section_order_overrides
+            new, override_sorting=self.formatter_options.section_order_overrides
         )
         self.data = tomli.loads(str(self))
 
     @property
     def indentation(self) -> int:
         """Return the indentation applied for each scope level change."""
-        return self.formatting_options.indentation
+        return self.formatter_options.indentation
 
     @indentation.setter
     def indentation(self, new):
         """Set the indentation and update the sections accordingly."""
-        self.formatting_options.indentation = new
+        self.formatter_options.indentation = new
         self.sections = self.sections
 
     def __repr__(self):
         return "\n".join(str(section) for section in self.sections)
 
 
-def _indent_atomic_toml_entry(entry: ParsedTomlFileEntry, indent: int = 0):
+def _indent_atomic_toml_entry(entry: _ParsedTomlFileEntry, indent: int = 0):
     if isinstance(entry.item, Whitespace):
         return
     indent_str = indent * " "
@@ -305,7 +309,7 @@ def _indent_atomic_toml_entry(entry: ParsedTomlFileEntry, indent: int = 0):
         if not is_multiline:
             str_repr = indent_str + str(entry)
             for line in str_repr.split("\n"):
-                if len(line.rstrip()) > entry.formatting_options.line_length:
+                if len(line.rstrip()) > entry.formatter_options.line_length:
                     should_be_multiline = True
                     break
 
@@ -328,10 +332,10 @@ def _indent_atomic_toml_entry(entry: ParsedTomlFileEntry, indent: int = 0):
 
 
 def _adjust_empty_lines(
-    section: Sequence[ParsedTomlFileEntry],
-) -> Tuple[ParsedTomlFileEntry]:
+    section: Sequence[_ParsedTomlFileEntry],
+) -> Tuple[_ParsedTomlFileEntry]:
     """Add/rm empty lines so sections start with a non-empty and end with 1 empty line."""
-    toml_newline = ParsedTomlFileEntry("\n")
+    toml_newline = _ParsedTomlFileEntry("\n")
     try:
         first_non_blank = next(
             ix for ix, x in enumerate(section) if not isinstance(x.item, Whitespace)
@@ -348,8 +352,8 @@ def _adjust_empty_lines(
 
 
 def _remove_consecutive_blanks(
-    entries: Sequence[ParsedTomlFileEntry],
-) -> Tuple[ParsedTomlFileEntry]:
+    entries: Sequence[_ParsedTomlFileEntry],
+) -> Tuple[_ParsedTomlFileEntry]:
     new_entries = []
     for ientry, entry in enumerate(entries):
         if isinstance(entry.item, Whitespace):
@@ -361,8 +365,8 @@ def _remove_consecutive_blanks(
 
 
 def _sort_keys(
-    section_entries: Sequence[ParsedTomlFileEntry],
-) -> Tuple[ParsedTomlFileEntry]:
+    section_entries: Sequence[_ParsedTomlFileEntry],
+) -> Tuple[_ParsedTomlFileEntry]:
     section_entries = list(section_entries)
     sorted_section_entries = []
     current_sorting_block = []
@@ -386,8 +390,9 @@ def _sort_keys(
 
 
 def _split_data_in_sections(
-    entries: TomlFileEntriesContainer, formatting_options: ParsedConfig = DEFAULT_CONFIG
-) -> Tuple[FormattedTomlFileSection]:
+    entries: _TomlFileEntriesContainer,
+    formatter_options: FormatterOptions = DEFAULT_CONFIG,
+) -> Tuple[_FormattedTomlFileSection]:
     sections = []
     new_section = []
     new_section_start = True
@@ -431,15 +436,15 @@ def _split_data_in_sections(
             if all(isinstance(entry.item, Whitespace) for entry in sec):
                 continue
             rtn.append(
-                FormattedTomlFileSection(sec, formatting_options=formatting_options)
+                _FormattedTomlFileSection(sec, formatter_options=formatter_options)
             )
 
     return tuple(rtn)
 
 
 def _get_sorted_sequence_of_sections(
-    sections: Sequence[FormattedTomlFileSection], override_sorting: Sequence[str] = ()
-) -> Tuple[FormattedTomlFileSection]:
+    sections: Sequence[_FormattedTomlFileSection], override_sorting: Sequence[str] = ()
+) -> Tuple[_FormattedTomlFileSection]:
     sorting_blocks = []
     current_block = []
 

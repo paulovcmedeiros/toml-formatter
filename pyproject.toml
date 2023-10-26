@@ -120,7 +120,7 @@
 [tool.ruff.pydocstyle]
   convention = "google"
 
-[tool.toml_formatter]
+[tool.toml-formatter]
   indentation = 2
   section_order_overrides = [
     "^tool.poetry$",
