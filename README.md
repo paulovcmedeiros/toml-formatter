@@ -2,7 +2,7 @@
 [![Github Pages](https://img.shields.io/badge/github%20pages-121013?style=for-the-badge&logo=github&logoColor=white)](https://paulovcmedeiros.github.io/toml-formatter-docs/)
 
 
-[![Contributors Welcome](https://img.shields.io/badge/Contributors-welcome-<COLOR>.svg)](https://shields.io/)
+[![Contributors Welcome](https://img.shields.io/badge/Contributors-welcome-<COLOR>.svg)](https://github.com/paulovcmedeiros/toml-formatter/pulls)
 ![Linting](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/linting.yaml/badge.svg)
 ![Tests](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/tests.yaml/badge.svg)
 [![codecov](https://codecov.io/gh/paulovcmedeiros/toml-formatter/graph/badge.svg?token=XI8G1WH9O6)](https://codecov.io/gh/paulovcmedeiros/toml-formatter)
