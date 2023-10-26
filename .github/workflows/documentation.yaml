@@ -1,0 +1,87 @@
+name: Build and Deploy Documentation
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - '**.py'
+      - '*.rst'
+      - '*.md'
+      - '.github/workflows/documentation.yaml'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - '**.py'
+      - '*.rst'
+      - '*.md'
+      - '.github/workflows/documentation.yaml'
+  workflow_dispatch:
+    branches:
+      - master
+      - develop
+permissions:
+    contents: write
+
+jobs:
+  docs:
+    if: github.repository_owner == 'paulovcmedeiros'
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      #----------------------------------------------
+      #  --- configure poetry & install project  ----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install poethepoet
+        run: poetry self add 'poethepoet[poetry_plugin]'
+
+      - name: Load cached venv (if cache exists)
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: ${{ github.job }}-venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml', '**/poetry.toml') }}
+
+      - name: Install dependencies (if venv cache is not found)
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --only main,doc
+
+      - name: Install the project itself
+        run: poetry install --no-interaction --only-root
+
+      #----------------------------------------------
+      #  ---      create and publish docs        ----
+      #----------------------------------------------
+      - name: Build Docs
+        run: |
+          poetry devtools doc build
+
+      - name: Deploy to https://github.com/paulovcmedeiros/toml-formatter-docs
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: 'docs/_build/'
+          destination-repository-name: 'paulovcmedeiros/toml-formatter-docs'
+          target-branch: gh-pages
+          target-directory: docs/
+          user-name: API Doc Builder
+          user-email: toml-formatter@noreply.github.com

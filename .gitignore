@@ -1,0 +1,26 @@
+# IDE stuff
+*.swp
+.idea/
+.vscode/
+
+
+# pytest-cov
+.coverage
+.coverage.xml
+
+# Linting artifacts
+.flakeheaven_cache/
+.ruff_cache
+
+# Non-tracked doc files
+docs/_build/
+docs/toml-formatter.rst
+docs/markdown_docs/config.md
+docs/toml_formatter.rst
+
+# Poetry stuff
+poetry.lock
+.venv/
+
+# Stuff generated at runtime
+**/__pycache__/
