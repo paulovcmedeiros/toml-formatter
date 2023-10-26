@@ -3,8 +3,8 @@
 
 
 [![Contributors Welcome](https://img.shields.io/badge/Contributors-welcome-<COLOR>.svg)](https://github.com/paulovcmedeiros/toml-formatter/pulls)
-![Linting](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/linting.yaml/badge.svg)
-![Tests](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/tests.yaml/badge.svg)
+[![Linting](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/linting.yaml/badge.svg)](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/linting.yaml)
+[![Tests](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/tests.yaml/badge.svg)](https://github.com/paulovcmedeiros/toml-formatter/actions/workflows/tests.yaml)
 [![codecov](https://codecov.io/gh/paulovcmedeiros/toml-formatter/graph/badge.svg?token=XI8G1WH9O6)](https://codecov.io/gh/paulovcmedeiros/toml-formatter)
 
 # TOML Formatter

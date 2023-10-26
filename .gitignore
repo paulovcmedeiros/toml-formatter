@@ -13,7 +13,10 @@
 .ruff_cache
 
 # Non-tracked doc files
-docs/
+docs/_build/
+docs/toml-formatter.rst
+docs/markdown_docs/config.md
+docs/toml_formatter.rst
 
 # Poetry stuff
 poetry.lock
