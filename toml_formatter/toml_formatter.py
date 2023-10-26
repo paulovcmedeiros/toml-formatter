@@ -285,8 +285,12 @@ class FormattedToml:
         self.formatter_options.indentation = new
         self.sections = self.sections
 
-    def __repr__(self):
+    def dumps(self):
+        """Return a string representation of the formatted TOML."""
         return "\n".join(str(section) for section in self.sections)
+
+    def __repr__(self):
+        return self.dumps()
 
 
 def _indent_atomic_toml_entry(entry: _ParsedTomlFileEntry, indent: int = 0):
