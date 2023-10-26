@@ -56,7 +56,7 @@ class ParsedTomlFileEntry:
     ):
         """Initialise instance."""
         self.toml_doc_obj = tomlkit.loads(single_entry_string)
-        self.formatting_options = formatting_options
+        self.formatting_options = ParsedConfig.model_validate(formatting_options)
 
     @property
     def toml_doc_obj(self):
@@ -190,7 +190,7 @@ class FormattedTomlFileSection(BaseTomlContentsSequence):
         self, data: Sequence[str], formatting_options: ParsedConfig = DEFAULT_CONFIG
     ):
         """Initialise instance."""
-        self.formatting_options = formatting_options
+        self.formatting_options = ParsedConfig.model_validate(formatting_options)
         self.data = data
 
     @BaseTomlContentsSequence.data.setter
@@ -237,7 +237,7 @@ class FormattedToml:
         self, raw_data: Sequence[str], formatting_options: ParsedConfig = DEFAULT_CONFIG
     ):
         """Initialise, with `raw_data` being like the output of a file's `readlines`."""
-        self.formatting_options = formatting_options
+        self.formatting_options = ParsedConfig.model_validate(formatting_options)
         self.sections = _split_data_in_sections(
             TomlFileEntriesContainer(data=raw_data),
             formatting_options=self.formatting_options,
